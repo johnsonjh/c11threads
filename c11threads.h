@@ -213,7 +213,7 @@ typedef pthread_key_t   tss_t;
 typedef pthread_once_t  once_flag;
 
 /*
- * ---- Thread Management ----
+ * Thread Management
  */
 
 static C11THREADS_INLINE int
