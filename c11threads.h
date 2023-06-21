@@ -357,8 +357,8 @@ static C11THREADS_INLINE int
 mtx_timedlock(mtx_t *mtx, const struct timespec *ts)
 {
   int res = 0;
-
 #  ifdef C11THREADS_NO_TIMED_MUTEX
+  int st1 = 0;
 
   /*
    * Fake a timedlock by polling trylock
@@ -373,7 +373,26 @@ mtx_timedlock(mtx_t *mtx, const struct timespec *ts)
 
   while (( res = pthread_mutex_trylock(mtx) ) == EBUSY)
     {
-      gettimeofday(&now, NULL);
+      st1 = clock_gettime(
+#   ifdef USE_MONOTONIC
+              CLOCK_MONOTONIC,
+#   else
+              CLOCK_REALTIME,
+#   endif /* ifdef USE_MONOTONIC */
+              &now);
+
+      if (st1 != 0)
+        {
+          fprintf (stderr, "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
+                   __func__, __FILE__, __LINE__);
+#   if defined(USE_BACKTRACE)
+#    ifdef SIGUSR2
+          (void)raise(SIGUSR2);
+          /*NOTREACHED*/ /* unreachable */
+#    endif /* ifdef SIGUSR2 */
+#   endif /* if defined(USE_BACKTRACE) */
+          abort();
+        }
 
       if (now.tv_sec > ts->tv_sec
           || ( now.tv_sec == ts->tv_sec && ( now.tv_usec * 1000 )
@@ -489,6 +508,7 @@ call_once(once_flag *flag, void ( *func ) (void))
 static C11THREADS_INLINE int
 timespec_get(struct timespec *ts, int base)
 {
+  int st1 = 0;
   struct timeval tv;
 
   if (base != TIME_UTC)
@@ -496,10 +516,31 @@ timespec_get(struct timespec *ts, int base)
       return 0;
     }
 
-  if (gettimeofday(&tv, 0) == -1)
-    {
-      return 0;
-    }
+    st1 = clock_gettime(
+#   ifdef USE_MONOTONIC
+           CLOCK_MONOTONIC,
+#   else
+           CLOCK_REALTIME,
+#   endif /* ifdef USE_MONOTONIC */
+           &now);
+
+    if (st1 != 0)
+      {
+        fprintf (stderr, "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
+                 __func__, __FILE__, __LINE__);
+#   if defined(USE_BACKTRACE)
+#    ifdef SIGUSR2
+        (void)raise(SIGUSR2);
+        /*NOTREACHED*/ /* unreachable */
+#    endif /* ifdef SIGUSR2 */
+#   endif /* if defined(USE_BACKTRACE) */
+        abort();
+      }
+
+    if (st1 == -1)
+      {
+        return 0;
+      }
 
   ts->tv_sec   = tv.tv_sec;
   ts->tv_nsec  = tv.tv_usec * 1000;
