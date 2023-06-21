@@ -269,7 +269,8 @@ _c11threads_win32_init(void)
         }
     }
 
-  InitializeCriticalSection(&_c11threads_win32_thrd_list_critical_section);
+  InitializeCriticalSection(
+    &_c11threads_win32_thrd_list_critical_section);
 
   InitializeCriticalSection(
     &_c11threads_win32_tss_dtor_list_critical_section);
