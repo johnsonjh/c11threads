@@ -75,6 +75,10 @@
 #ifndef C11THREADS_H_
 # define C11THREADS_H_
 
+# ifdef TESTING
+#  include <stdio.h>
+# endif /* ifdef TESTING */
+
 /*
  * If you wish to use this with pthread-win32 (i.e. use the
  * POSIX threads wrapper instead of the native win32 API
@@ -518,11 +522,11 @@ timespec_get(struct timespec *ts, int base)
 
     st1 = clock_gettime(
 #   ifdef USE_MONOTONIC
-           CLOCK_MONOTONIC,
+            CLOCK_MONOTONIC,
 #   else
-           CLOCK_REALTIME,
+            CLOCK_REALTIME,
 #   endif /* ifdef USE_MONOTONIC */
-           &now);
+            &now);
 
     if (st1 != 0)
       {
