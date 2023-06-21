@@ -10,3 +10,7 @@
 Debug*/
 Release*/
 test/test
+test/compile_commands.json
+test/log.pvs
+test/pvsreport/
+compile_commands.json
