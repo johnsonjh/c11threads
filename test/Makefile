@@ -4,6 +4,7 @@ bin = test
 CFLAGS  = -std=gnu11 -Wall -O3 -flto=auto -g -I..
 LDFLAGS = -lpthread -flto=auto
 
+#CFLAGS += -DTESTING
 #CFLAGS += -DUSE_MONOTONIC
 
 $(bin): $(obj)
