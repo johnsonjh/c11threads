@@ -593,7 +593,11 @@ _c11threads_win32_util_timepoint_to_millisecond_timespan64(
 
       if (!_c11threads_win32_util_timespec64_to_milliseconds(&ts, &wait_time))
         {
-          /* Clamp wait_time. Pretend we've had a spurious wakeup if expired. */
+
+          /*
+           * Clamp wait_time. Pretend we've had a spurious wakeup if expired.
+           */
+
           wait_time  = INFINITE - 1;
           *clamped   = 1;
         }
