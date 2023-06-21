@@ -18,9 +18,9 @@
  *
  * Original authors:
  *   John Tsiombikas <nuclear@member.fsf.org>
- *       -- original POSIX threads wrapper
+ *       -- Original POSIX threads wrapper
  *   Oliver Old <oliver.old@outlook.com>
- *       -- win32 implementation
+ *       -- Win32 implementation
  *
  * I place this piece of code in the public domain.  Feel free to use
  * as you see fit.  I'd appreciate it if you keep my name at the top
