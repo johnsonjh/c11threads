@@ -666,7 +666,7 @@ _c11threads_win32_timespec64_get(struct _c11threads_win32_timespec64_t *ts,
 
   return base;
 }
-# else  /* if defined( C11THREADS_NO_TIMESPEC_GET ) || !defined( _MSC_VER ) */
+# else
 int
 _c11threads_win32_timespec32_get(struct _c11threads_win32_timespec32_t *ts,
                                  int base)

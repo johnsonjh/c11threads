@@ -117,7 +117,7 @@
 #  elif defined( _MSC_VER )
 #   if _MSC_VER >= 1900
 #    define C11THREADS_INLINE   inline
-#   else /* if _MSC_VER >= 1900 */
+#   else
 #    define C11THREADS_INLINE   __inline
 #   endif /* if _MSC_VER >= 1900 */
 
@@ -126,7 +126,7 @@
  * and let the user define C11THREADS_INLINE if it breaks
  */
 
-#  else  /* if __STDC_VERSION__ >= 199901L */
+#  else
 #   define C11THREADS_INLINE  __inline__
 #  endif /* if __STDC_VERSION__ >= 199901L */
 
@@ -310,7 +310,7 @@ mtx_init(mtx_t *mtx, int type)
     {
 #  ifdef PTHREAD_MUTEX_TIMED_NP
       pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_TIMED_NP);
-#  else  /* ifdef PTHREAD_MUTEX_TIMED_NP */
+#  else
       pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_NORMAL);
 #  endif /* ifdef PTHREAD_MUTEX_TIMED_NP */
     }
@@ -384,7 +384,7 @@ mtx_timedlock(mtx_t *mtx, const struct timespec *ts)
 
       nanosleep(&sleeptime, NULL);
     }
-#  else /* ifdef C11THREADS_NO_TIMED_MUTEX */
+#  else
   if (( res = pthread_mutex_timedlock(mtx, ts) ) == ETIMEDOUT)
     {
       return thrd_timedout;
@@ -508,7 +508,7 @@ timespec_get(struct timespec *ts, int base)
 }
 #  endif /* ifdef C11THREADS_NO_TIMESPEC_GET */
 
-# else /* C11THREADS_WIN32 */
+# else
 
 /*
  * C11 threads implementation using native Win32 API calls
@@ -518,7 +518,7 @@ timespec_get(struct timespec *ts, int base)
 #  ifndef thread_local
 #   ifdef _MSC_VER
 #    define thread_local   __declspec( thread )
-#   else /* ifdef _MSC_VER */
+#   else
 #    define thread_local   _Thread_local
 #   endif /* ifdef _MSC_VER */
 #  endif /* ifndef thread_local */
@@ -537,10 +537,10 @@ timespec_get(struct timespec *ts, int base)
 #   define C11THREADS_MSVC_NORETURN
 #   if __GNUC__ > 2 || ( __GNUC__ == 2 && __GNUC_MINOR__ >= 5 )
 #    define C11THREADS_GNUC_NORETURN  __attribute__ (( noreturn ))
-#   else /* if __GNUC__ > 2 || ( __GNUC__ == 2 && __GNUC_MINOR__ >= 5 ) */
+#   else
 #    define C11THREADS_GNUC_NORETURN
 #   endif /* if __GNUC__ > 2 || ( __GNUC__ == 2 && __GNUC_MINOR__ >= 5 ) */
-#  else  /* ifdef _MSC_VER */
+#  else
 #   define C11THREADS_MSVC_NORETURN
 #   define C11THREADS_GNUC_NORETURN
 #  endif /* ifdef _MSC_VER */
@@ -577,7 +577,7 @@ struct _c11threads_win32_timespec64_t
 {
 #  ifdef _MSC_VER
   __int64 tv_sec;
-#  else  /* ifdef _MSC_VER */
+#  else
   long long tv_sec;
 #  endif /* ifdef _MSC_VER */
   long tv_nsec;
