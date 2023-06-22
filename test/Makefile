@@ -54,6 +54,11 @@ LDFLAGS = $(LPTHREAD) $(LTO) ../../libsir/build/obj/*.lo
 
 ##########################################################################
 
+# AIX
+#CFLAGS += -Wno-incompatible-pointer-types
+
+##########################################################################
+
 #CFLAGS += -DTESTING
 #CFLAGS += -DUSE_MONOTONIC
 

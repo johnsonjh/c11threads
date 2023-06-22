@@ -165,7 +165,7 @@ main(void)
   /*     return 1; */
   /*   } */
 
-  (void)log_info("tests starting");
+  (void)log_info("tests starting\n");
 
 #ifdef TESTING
   (void)log_warn("TESTING defined");
@@ -188,18 +188,18 @@ main(void)
 #endif /* ifdef USE_C11THREADS_H */
 
 #ifdef USING_THREADS_H
-  (void)log_info("using C11 standard threads");
+  (void)log_info("using C11 standard threads\n");
 #endif /* ifdef USING_THREADS_H */
 
 #ifdef USING_C11THREADS_H
 # ifdef _WIN32
 #  ifdef C11THREADS_PTHREAD_WIN32
-  (void)log_info("using c11threads.h wrapper with winpthreads");
+  (void)log_info("using winpthreads via c11threads.h wrapper\n");
 #  else
-  (void)log_info("using c11threads.h wrapper with NT threads");
+  (void)log_info("using NT threads via c11threads.h wrapper\n");
 #  endif /* ifdef C11THREADS_PTHREAD_WIN32 */
 # else
-  (void)log_info("using c11threads.h wrapper");
+  (void)log_info("using POSIX threads via c11threads.h wrapper\n");
 # endif /* ifdef _WIN32 */
 #endif /* ifdef USING_C11THREADS_H */
 
@@ -403,7 +403,9 @@ run_thread_test(void)
     mtx_destroy(&mtx2);
 
 # ifndef _WIN32
+#  ifndef _AIX
     CHK_EXPECTED(timespec_get(&ts, TIME_UTC), TIME_UTC);
+#  endif /* ifndef _AIX */
 # endif /* ifndef _WIN32 */
 
     ts.tv_nsec += 500000000;
@@ -424,7 +426,9 @@ run_thread_test(void)
     CHK_EXPECTED(thrd_sleep(&dur, NULL), 0);
 
 # ifndef _WIN32
+#  ifndef _AIX
     CHK_EXPECTED(timespec_get(&ts, TIME_UTC), TIME_UTC);
+#  endif /* ifndef _AIX */
 # endif /* ifndef _WIN32 */
 
     ts.tv_nsec += 500000000;
