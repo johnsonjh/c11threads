@@ -63,6 +63,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sir.h"
+
 #define CHK_THRD_EXPECTED(a, b) \
         assert_thrd_expected(a, b, __FILE__, __LINE__, #a, #b)
 
@@ -72,7 +74,7 @@
 #define CHK_EXPECTED(a, b) \
         assert_expected(a, b, __FILE__, __LINE__, #a, #b)
 
-#define NUM_THREADS 8
+#define NUM_THREADS 16
 
 mtx_t      mtx;
 mtx_t      mtx2;
@@ -91,57 +93,135 @@ void run_call_once_test(void);
 int
 main(void)
 {
+
+  /*
+   * Instantiate the initialization structure.
+   */
+
+  loginit si = { 0 };
+
+  /*
+   * Configure levels for stdout.
+   * Send debug, information, warning, and notice messages there.
+   */
+
+  si.d_stdout.levels = LOGL_DEBUG | LOGL_INFO | LOGL_WARN | LOGL_NOTICE;
+
+  /*
+   * Configure options for stdout.
+   * Don't show the time stamp or process ID.
+   */
+
+  si.d_stdout.opts = LOGO_NOTIME | LOGO_NOPID;
+
+  /*
+   * Configure levels for stderr.
+   * Send error and above there.
+   */
+
+  si.d_stderr.levels = LOGL_ERROR | LOGL_CRIT | LOGL_ALERT | LOGL_EMERG;
+
+  /*
+   * Configure options for stderr.
+   * Don't show the time stamp or process ID.
+   */
+
+  si.d_stderr.opts = LOGO_NOTIME | LOGO_NOPID;
+
+  /*
+   * Configure options for syslog.
+   * Don't send any output there.
+   */
+
+  si.d_syslog.levels = 0;
+
+  /*
+   * Configure a name to associate with our output.
+   */
+
+  strcpy(si.processName, "test-c11threads");
+
+  /*
+   * Initialize logging.
+   */
+
+  if (!log_init(&si))
+    {
+      (void)fprintf(stderr, "\rERROR: Unable to initialize logging.\r\n");
+      return 1;
+    }
+
+  /*
+   * Configure and add a log file.
+   * Don't show the process name.
+   * Send all severity levels there.
+   */
+
+  /* logfileid_t fileid1 = log_addfile("test.log", LOGL_ALL, LOGO_NONAME); */
+
+  /* if (NULL == fileid1) */
+  /*   { */
+  /*     (void)fprintf(stderr, "\rERROR: Unable to initialize logging.\r\n"); */
+  /*     return 1; */
+  /*   } */
+
+  (void)log_info("tests starting");
+
 #ifdef TESTING
-  puts("TESTING defined");
+  (void)log_warn("TESTING defined");
 #endif /* ifdef TESTING */
 
 #ifdef USE_MONOTONIC
-  puts("USE_MONOTONIC defined");
+  (void)log_warn("USE_MONOTONIC defined");
 #endif /* ifdef USE_MONOTONIC */
 
 #ifdef __STDC_NO_THREADS__
-  puts("__STDC_NO_THREADS__ defined");
+  (void)log_info("__STDC_NO_THREADS__ defined");
 #endif /* ifdef __STDC_NO_THREADS__ */
 
 #ifdef USE_THREADS_H
-  puts("C11 standard threads explicitly requested");
+  (void)log_warn("C11 standard threads explicitly requested");
 #endif /* ifdef USE_THREADS_H */
 
 #ifdef USE_C11THREADS_H
-  puts("c11threads.h wrapper explicitly requested");
+  (void)log_warn("c11threads.h wrapper explicitly requested");
 #endif /* ifdef USE_C11THREADS_H */
 
 #ifdef USING_THREADS_H
-  puts("using C11 standard threads");
+  (void)log_info("using C11 standard threads");
 #endif /* ifdef USING_THREADS_H */
 
 #ifdef USING_C11THREADS_H
-# ifdef C11THREADS_PTHREAD_WIN32
-  puts("using c11threads.h wrapper with winpthreads");
+# ifdef _WIN32
+#  ifdef C11THREADS_PTHREAD_WIN32
+  (void)log_info("using c11threads.h wrapper with winpthreads");
+#  else
+  (void)log_info("using c11threads.h wrapper with NT threads");
+#  endif /* ifdef C11THREADS_PTHREAD_WIN32 */
 # else
-  puts("using c11threads.h wrapper");
-# endif /* ifdef C11THREADS_PTHREAD_WIN32 */
+  (void)log_info("using c11threads.h wrapper");
+# endif /* ifdef _WIN32 */
 #endif /* ifdef USING_C11THREADS_H */
 
-  puts("start thread test");
+  (void)log_notice("start thread test");
   run_thread_test();
-  puts("end thread test\n");
+  (void)log_notice("end thread test\n");
 
-  puts("start timed mutex test");
+  (void)log_notice("start timed mutex test");
   run_timed_mtx_test();
-  puts("end timed mutex test\n");
+  (void)log_notice("end timed mutex test\n");
 
-  puts("start condvar test");
+  (void)log_notice("start condvar test");
   run_cnd_test();
-  puts("end condvar test\n");
+  (void)log_notice("end condvar test\n");
 
-  puts("start thread-specific storage test");
+  (void)log_notice("start thread-specific storage test");
   run_tss_test();
-  puts("end thread-specific storage test\n");
+  (void)log_notice("end thread-specific storage test\n");
 
-  puts("start call once test");
+  (void)log_notice("start call once test");
   run_call_once_test();
-  puts("end call once test\n");
+  (void)log_notice("end call once test\n");
 
 #if defined( _WIN32 ) && !defined( C11THREADS_PTHREAD_WIN32 )
     c11threads_win32_destroy();
@@ -154,7 +234,9 @@ main(void)
       }
 #endif /* ifdef _WIN32 */
 
-  puts("tests finished");
+  (void)log_info("tests finished");
+
+  return 0;
 }
 
 void
@@ -191,9 +273,8 @@ assert_thrd_expected(int thrd_status, int expected, const char *file,
           break;
 
         default:
-          fprintf(
-            stderr,
-            "%s:%u: %s: error %d, expected %s\n",
+          (void)log_error(
+            "%s:%u: %s: error %d, expected %s",
             file,
             line,
             expr,
@@ -202,9 +283,8 @@ assert_thrd_expected(int thrd_status, int expected, const char *file,
           abort();
         }
 
-      fprintf(
-        stderr,
-        "%s:%u: %s: error %s, expected %s\n",
+      (void)log_error(
+        "%s:%u: %s: error %s, expected %s",
         file,
         line,
         expr,
@@ -221,9 +301,8 @@ assert_expected(int res, int expected, const char *file, unsigned int line,
   if (res != expected)
     {
       fflush(stdout);
-      fprintf(
-        stderr,
-        "%s:%u: %s: error %d, expected %s\n",
+      (void)log_error(
+        "%s:%u: %s: error %d, expected %s",
         file,
         line,
         expr,
@@ -241,13 +320,13 @@ tfunc(void *arg)
 
   num = (int)(size_t)arg;
 
-  printf("hello from thread %d\n", num);
+  (void)log_debug("hello from thread %d", num);
 
   dur.tv_sec   = 1;
   dur.tv_nsec  = 0;
   CHK_EXPECTED(thrd_sleep(&dur, NULL), 0);
 
-  printf("thread %d done\n", num);
+  (void)log_debug("thread %d done", num);
 
   return 0;
 }
@@ -323,7 +402,9 @@ run_thread_test(void)
     cnd_destroy(&cnd);
     mtx_destroy(&mtx2);
 
+# ifndef _WIN32
     CHK_EXPECTED(timespec_get(&ts, TIME_UTC), TIME_UTC);
+# endif /* ifndef _WIN32 */
 
     ts.tv_nsec += 500000000;
 
@@ -335,14 +416,16 @@ run_thread_test(void)
 
     CHK_THRD_EXPECTED(mtx_timedlock(&mtx, &ts), thrd_timedout);
 
-    puts("thread has locked mutex & we timed out waiting for it");
+    (void)log_debug("thread has locked mutex & we timed out waiting for it");
 
     dur.tv_sec   = 1;
     dur.tv_nsec  = 0;
 
     CHK_EXPECTED(thrd_sleep(&dur, NULL), 0);
 
+# ifndef _WIN32
     CHK_EXPECTED(timespec_get(&ts, TIME_UTC), TIME_UTC);
+# endif /* ifndef _WIN32 */
 
     ts.tv_nsec += 500000000;
 
@@ -352,9 +435,11 @@ run_thread_test(void)
         ts.tv_nsec -= 1000000000;
       }
 
+# ifndef _WIN32
     CHK_THRD(mtx_timedlock(&mtx, &ts));
+# endif /* ifndef _WIN32 */
 
-    puts("thread no longer has mutex & we grabbed it");
+    (void)log_debug("thread no longer has mutex & we grabbed it");
 
     CHK_THRD(mtx_unlock(&mtx));
 
@@ -381,12 +466,12 @@ my_cnd_thread_func(void *arg)
   do
     {
       CHK_THRD(cnd_wait(&cnd, &mtx));
-      printf("thread %d: woke up\n", thread_num);
+      (void)log_debug("thread %d: woke up", thread_num);
     }
   while (flag <= NUM_THREADS);
 
-  printf(
-    "thread %d: flag > NUM_THREADS; incrementing flag and exiting\n",
+  (void)log_debug(
+    "thread %d: flag > NUM_THREADS; incrementing flag and exiting",
     thread_num);
 
   ++flag;
@@ -427,13 +512,13 @@ run_cnd_test(void)
 
   CHK_THRD(mtx_unlock(&mtx));
 
-  puts("main thread: threads are ready");
+  (void)log_info("main thread: threads are ready");
 
   /*
    * No guarantees, but this might unblock a thread.
    */
 
-  puts("main thread: cnd_signal()");
+  (void)log_debug("main thread: cnd_signal()");
 
   CHK_THRD(cnd_signal(&cnd));
   CHK_THRD(thrd_sleep(&dur, NULL));
@@ -442,7 +527,7 @@ run_cnd_test(void)
    * No guarantees, but this might unblock all threads.
    */
 
-  puts("main thread: cnd_broadcast()");
+  (void)log_debug("main thread: cnd_broadcast()");
 
   CHK_THRD(cnd_broadcast(&cnd));
   CHK_THRD(thrd_sleep(&dur, NULL));
@@ -453,13 +538,13 @@ run_cnd_test(void)
 
   CHK_THRD(mtx_unlock(&mtx));
 
-  puts("main thread: set flag to NUM_THREADS + 1");
+  (void)log_debug("main thread: set flag to NUM_THREADS + 1");
 
   /*
    * No guarantees, but this might unblock two threads.
    */
 
-  puts("main thread: sending cnd_signal() twice");
+  (void)log_debug("main thread: sending cnd_signal() twice");
 
   CHK_THRD(cnd_signal(&cnd));
   CHK_THRD(cnd_signal(&cnd));
@@ -474,7 +559,7 @@ run_cnd_test(void)
 
   CHK_THRD(mtx_unlock(&mtx));
 
-  puts(
+  (void)log_debug(
     "main thread: woke up, flag != NUM_THREADS + 1; sending "
     "cnd_broadcast() and joining threads");
 
@@ -494,7 +579,7 @@ run_cnd_test(void)
 void
 my_tss_dtor(void *arg)
 {
-  printf("dtor: content of tss: %d\n", (int)(size_t)arg);
+  (void)log_debug("dtor: content of tss: %d", (int)(size_t)arg);
   CHK_EXPECTED((int)(size_t)arg, 42);
 }
 
@@ -506,14 +591,14 @@ my_tss_thread_func(void *arg)
   (void)arg;
 
   tss_content = tss_get(tss);
-  printf(
-    "thread func: initial content of tss: %d\n",
+  (void)log_debug(
+    "thread func: initial content of tss: %d",
     (int)(size_t)tss_content);
 
   CHK_THRD(tss_set(tss, (void *)42));
 
   tss_content = tss_get(tss);
-  printf("thread func: content of tss now: %d\n", (int)(size_t)tss_content);
+  (void)log_debug("thread func: content of tss now: %d", (int)(size_t)tss_content);
 
   CHK_EXPECTED((int)(size_t)tss_content, 42);
 
@@ -535,7 +620,7 @@ run_tss_test(void)
 void
 my_call_once_func(void)
 {
-  puts("my_call_once_func() was called");
+  (void)log_debug("my_call_once_func() was called");
   ++flag;
 }
 
@@ -544,7 +629,7 @@ my_call_once_thread_func(void *arg)
 {
   (void)arg;
 
-  puts("my_call_once_thread_func() was called");
+  (void)log_debug("my_call_once_thread_func() was called");
   call_once(&once, my_call_once_func);
 
   return 0;
@@ -568,7 +653,7 @@ run_call_once_test(void)
       CHK_THRD(thrd_join(threads[i], NULL));
     }
 
-  printf("content of flag: %d\n", flag);
+  (void)log_debug("content of flag: %d", flag);
 
   CHK_EXPECTED(flag, 1);
 }

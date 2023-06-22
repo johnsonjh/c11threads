@@ -14,3 +14,4 @@ test/compile_commands.json
 test/log.pvs
 test/pvsreport/
 compile_commands.json
+*.dll

@@ -385,10 +385,12 @@ mtx_timedlock(mtx_t *mtx, const struct timespec *ts)
 #   endif /* ifdef USE_MONOTONIC */
               &now);
 
+      fprintf(stderr, "\n%d\n",st1);
       if (st1 != 0)
         {
-          fprintf (stderr, "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
-                   __func__, __FILE__, __LINE__);
+          (void)log_emerg(
+                  "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
+                  __func__, __FILE__, __LINE__ );
 #   if defined(USE_BACKTRACE)
 #    ifdef SIGUSR2
           (void)raise(SIGUSR2);
@@ -530,8 +532,9 @@ timespec_get(struct timespec *ts, int base)
 
     if (st1 != 0)
       {
-        fprintf (stderr, "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
-                 __func__, __FILE__, __LINE__);
+        (void)log_emerg(
+                "\rFATAL: clock_gettime failure! Aborting at %s[%s:%d]\r\n",
+                __func__, __FILE__, __LINE__ );
 #   if defined(USE_BACKTRACE)
 #    ifdef SIGUSR2
         (void)raise(SIGUSR2);
