@@ -3,6 +3,53 @@
  */
 
 /*
+ * Ensure both USE_THREADS_H and USE_C11THREADS_H are not defined.
+ */
+
+#if defined ( USE_THREADS_H ) && defined ( USE_C11THREADS_H )
+# error Define only one of USE_THREADS_H or USE_C11THREADS_H
+#endif /* if defined ( USE_THREADS_H ) && defined ( USE_C11THREADS_H ) */
+
+/*
+ * Manual USE_THREADS_H and USE_C11THREADS_H overrides.
+ */
+
+#if defined ( USE_THREADS_H )
+# include <threads.h>
+# undef USING_THREADS_H
+# define USING_THREADS_H 1
+#elif defined ( USE_C11THREADS_H )
+# include "c11threads.h"
+# undef USING_C11THREADS_H
+# define USING_C11THREADS_H 1
+#endif /* if defined ( USE_THREADS_H ) || defined ( USE_C11THREADS_H ) */
+
+#ifndef __STDC_NO_THREADS__
+
+/*
+ * C23 __has_include syntax, but functions in GNU11
+ * mode using modern GCC and Clang-based compilers.
+ */
+
+# if !defined ( USING_THREADS_H ) && !defined ( USING_C11THREADS_H )
+#  if defined __has_include
+#   if __has_include ( <threads.h> )
+#    include <threads.h>
+#    undef USING_THREADS_H
+#    define USING_THREADS_H 1
+#   endif /* if __has_include ( <threads.h> ) */
+#  endif /* if defined __has_include */
+# endif /* if !defined ( USING_THREADS_H ) && !defined ( USING_C11THREADS_H ) */
+
+#endif /* ifndef __STDC_NO_THREADS__ */
+
+#if !defined ( USING_THREADS_H ) && !defined ( USING_C11THREADS_H )
+# include "c11threads.h"
+# undef USING_C11THREADS_H
+# define USING_C11THREADS_H 1
+#endif /* if !defined ( USING_THREADS_H ) && !defined ( USING_C11THREADS_H ) */
+
+/*
  * Needed for memory leak detection.
  */
 
@@ -11,8 +58,6 @@
 # include <stdlib.h>
 # include <crtdbg.h>
 #endif /* ifdef _WIN32 */
-
-#include "c11threads.h"
 
 #include <stddef.h>
 #include <stdio.h>
@@ -46,6 +91,38 @@ void run_call_once_test(void);
 int
 main(void)
 {
+#ifdef TESTING
+  puts("TESTING defined");
+#endif /* ifdef TESTING */
+
+#ifdef USE_MONOTONIC
+  puts("USE_MONOTONIC defined");
+#endif /* ifdef USE_MONOTONIC */
+
+#ifdef __STDC_NO_THREADS__
+  puts("__STDC_NO_THREADS__ defined");
+#endif /* ifdef __STDC_NO_THREADS__ */
+
+#ifdef USE_THREADS_H
+  puts("C11 standard threads explicitly requested");
+#endif /* ifdef USE_THREADS_H */
+
+#ifdef USE_C11THREADS_H
+  puts("c11threads.h wrapper explicitly requested");
+#endif /* ifdef USE_C11THREADS_H */
+
+#ifdef USING_THREADS_H
+  puts("using C11 standard threads");
+#endif /* ifdef USING_THREADS_H */
+
+#ifdef USING_C11THREADS_H
+# ifdef C11THREADS_PTHREAD_WIN32
+  puts("using c11threads.h wrapper with winpthreads");
+# else
+  puts("using c11threads.h wrapper");
+# endif /* ifdef C11THREADS_PTHREAD_WIN32 */
+#endif /* ifdef USING_C11THREADS_H */
+
   puts("start thread test");
   run_thread_test();
   puts("end thread test\n");

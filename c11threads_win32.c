@@ -70,9 +70,9 @@
   } while(0)
 #endif /* ifdef TESTING */
 
-# ifdef TESTING
-#  include <stdio.h>
-# endif /* ifdef TESTING */
+#ifdef TESTING
+# include <stdio.h>
+#endif /* ifdef TESTING */
 
 #if defined( _WIN32 ) && !defined( C11THREADS_PTHREAD_WIN32 )
 
