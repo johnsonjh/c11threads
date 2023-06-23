@@ -31,13 +31,13 @@
   * the Oracle Studio 12.6 (or later) C compiler.
   */
 
-#ifdef __linux__
+#if defined(__linux__) || ((defined(__SVR4) || defined(__svr4__)) || (defined(__sun) || defined(sun)))
 # ifdef __SUNPRO_C
 #  if __SUNPRO_C >= 0x5150
 #   define USE_THREADS_H 1
 #  endif /* if __SUNPRO_C <= 0x5150 */
 # endif /* ifdef __SUNPRO_C */
-#endif /* ifdef __linux__ */
+#endif /* if defined(__linux__) || ((defined(__SVR4) || defined(__svr4__)) || (defined(__sun) || defined(sun))) */
 
 /*
  * Manual USE_THREADS_H and USE_C11THREADS_H overrides.
