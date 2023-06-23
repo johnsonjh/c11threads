@@ -10,6 +10,22 @@
 # error Define only one of USE_THREADS_H or USE_C11THREADS_H
 #endif /* if defined ( USE_THREADS_H ) && defined ( USE_C11THREADS_H ) */
 
+ /*
+  * OS hints.
+  */
+
+ /*
+  * Default to C11THREADS on FreeBSD, due to a test
+  * failure when using the system threads.h, for now.
+  */
+
+#ifdef __FreeBSD__
+# ifndef USE_THREADS_H
+#  undef USE_C11THREADS_H
+#  define USE_C11THREADS_H 1
+# endif /* ifndef USE_THREADS_H */
+#endif /* ifdef __FreeBSD__ */
+
 /*
  * Manual USE_THREADS_H and USE_C11THREADS_H overrides.
  */
