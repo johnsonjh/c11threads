@@ -15,16 +15,16 @@
   */
 
  /*
-  * Default to C11THREADS on FreeBSD, due to a test
-  * failure when using the system threads.h, for now.
+  * Default to C11THREADS on FreeBSD and Haiku, due to a
+  * test failure when using the system threads.h, for now.
   */
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__HAIKU__)
 # ifndef USE_THREADS_H
 #  undef USE_C11THREADS_H
 #  define USE_C11THREADS_H 1
 # endif /* ifndef USE_THREADS_H */
-#endif /* ifdef __FreeBSD__ */
+#endif /* if defined(__FreeBSD__) || defined(__HAIKU__) */
 
  /*
   * Default to THREADS on Linux systems, when using
